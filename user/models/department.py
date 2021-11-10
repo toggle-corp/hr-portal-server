@@ -10,7 +10,7 @@ class Department(models.Model):
     )
     description = models.TextField(null=True, blank=True)
     logo = models.ImageField(upload_to='department-logo/', null=True, blank=True)
-    # url = models.URLField(verbose_name=_('URL'), max_length=256)
+    logo_url = models.URLField(verbose_name=_('Logo URL'), null=True, blank=True)
 
     class Meta:
         verbose_name = _('Department')

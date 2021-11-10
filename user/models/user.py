@@ -11,6 +11,7 @@ class User(AbstractUser):
     primary_email = models.EmailField(unique=True)  # Make email unique
     secondary_email = models.EmailField(unique=True, null=True, blank=True)
     joined_at = models.DateField(null=True, blank=True, help_text='Joined TC')
+    avatar = models.ImageField(upload_to='avatar/', null=True, blank=True)
     avatar_url = models.URLField(null=True, blank=True)
     department = models.ManyToManyField('Department', through='UserDepartment', related_name='user')
     birthday = models.DateField(null=True, blank=True)
