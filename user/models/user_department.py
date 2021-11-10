@@ -10,4 +10,4 @@ class UserDepartment(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='user_department')
 
     def __str__(self):
-        return str(self.name) + " , " + str(self.department)
+        return str(self.user) + " , " + str(self.department)

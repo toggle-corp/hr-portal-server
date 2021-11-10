@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3
+FROM python:3.10-slim-buster
 
 # set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -23,3 +23,5 @@ RUN pip install --upgrade --no-cache-dir pip poetry \
 COPY . /code/
 
 # EXPOSE 8050
+
+# CMD ["scripts/run_prod.sh"]

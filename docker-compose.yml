@@ -3,17 +3,19 @@ version: "3.7"
 services:
     db:
       image: postgres
-      container_name : db
       volumes:
-        - ./data/db:/var/lib/postgresql/data
+        - postgres-data:/var/lib/postgresql/data
       environment:
-        # - POSTGRES_DB=hr_portal_tc
-        # - POSTGRES_USER=hr_portal_tc_user
         - POSTGRES_PASSWORD=postgres
         
     server:
       build: .
-      container_name: hr_portal
+      environment:
+        DEBUG_COLORS: "true"
+        TERM: xterm-256color
+        COLORTERM: truecolor
+      env_file:
+        - .env
       command: bash -c "/code/scripts/run_develop.sh"
       volumes:
         - .:/code
@@ -24,28 +26,3 @@ services:
 
 volumes:
   postgres-data:
-
-
-#   server:
-#     build: .
-#     environment:
-#       DEBUG_COLORS: "true"
-#       TERM: xterm-256color
-#       COLORTERM: truecolor
-#     env_file:
-#       - server.env
-#     tty: true
-#     # command: bash -c "/code/scripts/run_prod.sh"
-#     command: bash -c "/code/scripts/run_develop.sh"
-#     volumes:
-#       - .:/code
-#     ports:
-#       # - "8090:80"
-#       - "8090:8090"
-#     depends_on:
-#       - db
-#       - redis
-
-# volumes:
-#   postgres-data:
-#   redis-data:

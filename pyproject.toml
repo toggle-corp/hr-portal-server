@@ -7,8 +7,8 @@ authors = ["Rup-Narayan-Rajbanshi <rswarup03@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = "^3.2.9"
-psycopg2 = "^2.9.1"
 Pillow = "^8.4.0"
+psycopg2-binary = "^2.9.1"
 
 [tool.poetry.dev-dependencies]
 
