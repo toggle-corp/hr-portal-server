@@ -7,9 +7,9 @@ services:
       volumes:
         - ./data/db:/var/lib/postgresql/data
       environment:
-        - POSTGRES_DB=hr_portal_tc
-        - POSTGRES_USER=hr_portal_tc_user
-        - POSTGRES_PASSWORD=hr_portal_tc_123
+        # - POSTGRES_DB=hr_portal_tc
+        # - POSTGRES_USER=hr_portal_tc_user
+        - POSTGRES_PASSWORD=postgres
         
     server:
       build: .
