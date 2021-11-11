@@ -19,6 +19,7 @@ services:
       command: bash -c "/code/scripts/run_develop.sh"
       volumes:
         - .:/code
+        - media:/media
       ports:
         - "8050:8050"
       depends_on:
@@ -26,3 +27,4 @@ services:
 
 volumes:
   postgres-data:
+  media:

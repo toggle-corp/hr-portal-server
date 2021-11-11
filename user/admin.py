@@ -1,7 +1,5 @@
 from django.contrib import admin
-from user.models.user import User
-from user.models.department import Department
-from user.models.user_department import UserDepartment
+from user.models import User, UserDepartment, Department
 
 # Register your models here.
 

@@ -21,12 +21,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!e0m0@&cr(d6masr)#c6-xb@g@gyrs08^!utz#%7y88!ahx!vn'
-
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS']
 
 
 # Application definition
@@ -88,11 +87,11 @@ WSGI_APPLICATION = 'hr_portal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'PORT': os.environ.get('DATABASE_PORT'),
-        'HOST': os.environ.get('DATABASE_HOST'),
+        'NAME': os.environ['DATABASE_NAME'],
+        'USER': os.environ['DATABASE_USER'],
+        'PASSWORD': os.environ['DATABASE_PASSWORD'],
+        'PORT': os.environ['DATABASE_PORT'],
+       'HOST': os.environ['DATABASE_HOST'],
     }
 }
 
@@ -122,7 +121,7 @@ AUTH_USER_MODEL = 'user.User'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.environ['TIME_ZONE']
 
 USE_I18N = True
 
@@ -134,14 +133,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-# STATIC_URL = '/static/'
 
 if DEBUG:
     STATIC_URL = '/static/'
-    STATIC_ROOT = BASE_DIR / '/static'
+    STATIC_ROOT = '/static'
 
     MEDIA_URL = "/media/"
-    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_ROOT = "/media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
