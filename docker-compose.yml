@@ -1,0 +1,30 @@
+version: "3.7"
+   
+services:
+    db:
+      image: postgres
+      volumes:
+        - postgres-data:/var/lib/postgresql/data
+      environment:
+        - POSTGRES_PASSWORD=postgres
+        
+    server:
+      build: .
+      environment:
+        DEBUG_COLORS: "true"
+        TERM: xterm-256color
+        COLORTERM: truecolor
+      env_file:
+        - .env
+      command: bash -c "/code/scripts/run_develop.sh"
+      volumes:
+        - .:/code
+        - media:/media
+      ports:
+        - "8050:8050"
+      depends_on:
+        - db
+
+volumes:
+  postgres-data:
+  media:
