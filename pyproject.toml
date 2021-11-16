@@ -16,6 +16,9 @@ graphene-file-upload = "1.2.2"
 sentry-sdk = "1.1.0"
 djangorestframework = "3.12.4"
 celery = "5.1.1"
+django-enumfield = "^2.0.2"
+factory-boy = "^3.2.1"
+drf-dynamic-fields = "0.3.1"
 
 [tool.poetry.dev-dependencies]
 

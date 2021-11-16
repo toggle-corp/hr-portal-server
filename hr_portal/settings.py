@@ -45,6 +45,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'graphene_django',
     'graphene_graphiql_explorer',
+    'drf_dynamic_fields',
 ]
 
 
@@ -73,7 +74,9 @@ GRAPHENE_NODES_WHITELIST = (
     '__type',
     '__typename',
     # custom nodes...
-    'login'
+    'login',
+    'logout',
+    'me',
 )
 
 MIDDLEWARE = [

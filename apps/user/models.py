@@ -18,6 +18,7 @@ class User(AbstractUser):
     gender = models.CharField(
         choices=Gender.choices,
         max_length=10,
+        default=Gender.MALE,
         null=True, blank=True,
         help_text='Choose Gender'
     )
@@ -26,7 +27,11 @@ class User(AbstractUser):
     address = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
-        return self.first_name + " " + self.last_name
+        return " %s %s " % (self.first_name, self.last_name)
+
+    @property
+    def full_name(self):
+        return "%s %s" % (self.first_name, self.last_name)
 
 
 class Department(models.Model):
