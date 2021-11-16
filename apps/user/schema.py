@@ -20,5 +20,4 @@ class Query(graphene.ObjectType):
     users = graphene.List(UserType)
 
     def resolve_users(self, info):
-        print(info.context.user.is_authenticated)
         return User.objects.all()
