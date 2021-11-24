@@ -40,5 +40,5 @@ class TestUserQuery(GraphQLTestCase):
         self.force_login(user)
 
         content = self.query_check(self.query_me)
-        self.assertEqual(content['data']['me']['id'], str(user.id), content)
+        self.assertIdEqual(content['data']['me']['id'], user.id, content)
         self.assertEqual(content['data']['me']['email'], user.email, content)

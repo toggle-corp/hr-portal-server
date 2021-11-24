@@ -44,6 +44,7 @@ INTERNAL_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'graphene_django',
+    # 'graphene_django_extras',
     'graphene_graphiql_explorer',
     'drf_dynamic_fields',
 ]
@@ -69,14 +70,19 @@ GRAPHENE = {
     ],
 }
 
+GRAPHENE_DJANGO_EXTRAS = {
+    'DEFAULT_PAGINATION_CLASS': 'graphene_django_extras.paginations.PageGraphqlPagination',
+    'DEFAULT_PAGE_SIZE': 20,
+    'MAX_PAGE_SIZE': 50,
+}
+
+
 GRAPHENE_NODES_WHITELIST = (
     '__schema',
     '__type',
     '__typename',
     # custom nodes...
     'login',
-    'logout',
-    'me',
 )
 
 MIDDLEWARE = [

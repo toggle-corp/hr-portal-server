@@ -25,11 +25,12 @@ class Leave(UserResourceModel):
         PENDING = 0, _('Pending')
         APPROVED = 1, _('Approved')
         DENIED = 2, _('Denied')
+
     type = models.IntegerField(choices=Type.choices)
     status = models.IntegerField(
         choices=Status.choices, default=Status.PENDING
     )
-    num_of_days = models.FloatField(verbose_name='number of days')
+    num_of_days = models.FloatField(verbose_name='number of days(Auto-calculated)')
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     additional_information = models.TextField(null=True, blank=True)
@@ -45,10 +46,10 @@ class LeaveDay(models.Model):
         SECOND_HALF = 1, _('Second half')
         FULL = 2, _('Full')
 
-    leave = models.ForeignKey(Leave, on_delete=models.CASCADE, related_name="leave_day")
+    leave = models.ForeignKey(Leave, on_delete=models.CASCADE, related_name="leave_days")
     date = models.DateField()
     type = models.IntegerField(choices=Type.choices, default=Type.FULL)
-    additional_information = models.TextField(null=True)
+    additional_information = models.TextField(blank=True)
 
     def __str__(self):
         return str(self.date)

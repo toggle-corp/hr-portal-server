@@ -4,7 +4,6 @@ from apps.user.factories import UserFactory
 
 class TestUserMutation(GraphQLTestCase):
     def setUp(self):
-        # This is used in 2 test
         self.login_mutation = '''
             mutation Mutation($input: LoginInputType!) {
               login(data: $input) {
@@ -30,8 +29,7 @@ class TestUserMutation(GraphQLTestCase):
         user = UserFactory.create(username=minput['username'])
         minput = dict(username=user.username, password=user.password_text)
         content = self.query_check(self.login_mutation, minput=minput, okay=True)
-        # FIXME: Maybe ['id'] should be string?
-        self.assertEqual(content['data']['login']['result']['id'], str(user.id), content)
+        self.assertIdEqual(content['data']['login']['result']['id'], user.id, content)
         self.assertEqual(content['data']['login']['result']['username'], user.username, content)
 
     def test_logout(self):
@@ -59,7 +57,7 @@ class TestUserMutation(GraphQLTestCase):
 
         # Query Me (Success)
         content = self.query_check(query)
-        self.assertEqual(content['data']['me']['id'], str(user.id), content)
+        self.assertIdEqual(content['data']['me']['id'], user.id, content)
         self.assertEqual(content['data']['me']['email'], user.email, content)
         # # Logout
         self.query_check(logout_mutation, okay=True)

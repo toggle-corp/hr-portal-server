@@ -26,19 +26,10 @@ class UserResourceModel(models.Model):
     def save(self, *args, **kwargs):
         def _set_user_info(instance):
             current_user = get_current_user()
-            if current_user is None:
-                return instance
-            if current_user.is_anonymous:
+            if current_user is None or current_user.is_anonymous:
                 return instance
             self.modified_by = current_user
-            # Let superuser create leave for other
-            if (
-                instance.pk is None and
-                not (
-                    current_user.is_superuser and
-                    getattr(self, 'created_by', None) is not None
-                )
-            ):
+            if instance.pk is None:
                 self.created_by = current_user
             return instance
 

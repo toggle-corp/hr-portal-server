@@ -46,13 +46,13 @@ class TestLeaveQuery(GraphQLTestCase):
 
         # Login
         self.force_login(user)
-        leave_contents = LeaveFactory.create_batch(5, created_by=user)
+        leaves = LeaveFactory.create_batch(5, created_by=user)
         content = self.query_check(self.query_leave)
         # query object count must be equal to the number of leave object created by authenticated user
         self.assertEqual(len(content['data']['leaves']), 5, content)
         # authenticatd user id must be equal to user id of a user in query
-        self.assertEqual(content['data']['leaves'][0]['createdBy']['id'], str(user.id), content)
-        self.assertEqual(content['data']['leaves'][0]['createdBy']['id'], str(leave_contents[0].created_by.id), content)
+        self.assertIdEqual(content['data']['leaves'][0]['createdBy']['id'], user.id, content)
+        self.assertIdEqual(content['data']['leaves'][0]['createdBy']['id'], leaves[0].created_by.id, content)
 
         user2 = UserFactory.create()
         # Login

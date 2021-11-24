@@ -1,6 +1,4 @@
-from drf_dynamic_fields import DynamicFieldsMixin
 from hr_portal.serializers import (
-    RemoveNullFieldsMixin,
     WriteOnlyOnCreateSerializerMixin,
 )
 from rest_framework import serializers
@@ -23,8 +21,7 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 
-class UserSerializer(RemoveNullFieldsMixin, WriteOnlyOnCreateSerializerMixin,
-                     DynamicFieldsMixin, serializers.ModelSerializer):
+class UserSerializer(WriteOnlyOnCreateSerializerMixin, serializers.ModelSerializer):
 
     class Meta:
         model = User
@@ -33,10 +30,7 @@ class UserSerializer(RemoveNullFieldsMixin, WriteOnlyOnCreateSerializerMixin,
         write_only_on_create_fields = ('email', 'username')
 
     def create(self, validated_data):
-        user = super().create(validated_data)
-        user.save()
-        # send_password_reset(user=user, welcome=True)
-        return user
+        raise Exception("Sorry, Create method is not used for now")
 
     def update(self, instance, validated_data):
         user = super().update(instance, validated_data)
