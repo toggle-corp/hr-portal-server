@@ -2,12 +2,12 @@ from typing import Union
 from apps.user.models import User
 import graphene
 from graphene_django import DjangoObjectType
-# from graphene_django_extras import PageGraphqlPagination
+from graphene_django_extras import PageGraphqlPagination
 
 from .enums import UserGenderEnum
 from utils.graphene.enums import EnumDescription
-# from utils.graphene.fields import DjangoPaginatedListObjectField
-# from utils.graphene.types import CustomDjangoListObjectType
+from utils.graphene.fields import DjangoPaginatedListObjectField
+from utils.graphene.types import CustomDjangoListObjectType
 from .filters import UserFilterSet
 
 
@@ -24,10 +24,10 @@ class UserType(DjangoObjectType):
     gender_display = EnumDescription(source='get_gender_display', required=True)
 
 
-# class UserListType(CustomDjangoListObjectType):
-#     class Meta:
-#         model = User
-#         filterset_class = UserFilterSet
+class UserListType(CustomDjangoListObjectType):
+    class Meta:
+        model = User
+        filterset_class = UserFilterSet
 
 
 class UserMeType(DjangoObjectType):
@@ -41,12 +41,12 @@ class UserMeType(DjangoObjectType):
 
 
 class Query:
-    # users = DjangoPaginatedListObjectField(
-    #     UserListType,
-    #     pagination=PageGraphqlPagination(
-    #         page_size_query_param='pageSize'
-    #     )
-    # )
+    users = DjangoPaginatedListObjectField(
+        UserListType,
+        pagination=PageGraphqlPagination(
+            page_size_query_param='pageSize'
+        )
+    )
     me = graphene.Field(UserMeType)
 
     def resolve_me(root, info, **kwargs) -> Union[User, None]:
