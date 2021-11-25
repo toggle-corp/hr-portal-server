@@ -2,12 +2,12 @@ from typing import Union
 from apps.user.models import User
 import graphene
 from graphene_django import DjangoObjectType
-from graphene_django_extras import PageGraphqlPagination
+# from graphene_django_extras import PageGraphqlPagination
 
 from .enums import UserGenderEnum
 from utils.graphene.enums import EnumDescription
-from utils.graphene.fields import DjangoPaginatedListObjectField
-from utils.graphene.types import CustomDjangoListObjectType
+# from utils.graphene.fields import DjangoPaginatedListObjectField
+# from utils.graphene.types import CustomDjangoListObjectType
 from .filters import UserFilterSet
 
 

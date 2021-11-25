@@ -1,5 +1,6 @@
 from functools import partial
 import graphene
+from django.db.models import QuerySet
 from graphene.utils.str_converters import to_snake_case
 from graphene_django.filter.utils import get_filtering_args_from_filterset
 from graphene_django.utils import maybe_queryset, is_valid_django_model
@@ -59,6 +60,7 @@ class CustomDjangoListField(DjangoListField):
             object_type,
             parent_resolver,
         )
+
 
 class DjangoPaginatedListObjectField(DjangoFilterPaginateListField):
     def __init__(

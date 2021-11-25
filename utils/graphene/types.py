@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-import graphene
+# import graphene
 
 from django.db.models import QuerySet
 from graphene import ObjectType, Field, Int
