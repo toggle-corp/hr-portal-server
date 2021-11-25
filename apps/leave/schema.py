@@ -1,14 +1,12 @@
-from apps.leave.models import Leave, LeaveDay
-# from utils.graphene.fields import DjangoPaginatedListObjectField
-
 import graphene
 from graphene_django import DjangoObjectType
-from graphene_django_extras import DjangoObjectField
-# from graphene_django_extras import DjangoObjectField, PageGraphqlPagination
-# from utils.graphene.types import CustomDjangoListObjectType
+from graphene_django_extras import DjangoObjectField, PageGraphqlPagination
+
+from apps.leave.models import Leave, LeaveDay
+from utils.graphene.fields import DjangoPaginatedListObjectField
+from utils.graphene.types import CustomDjangoListObjectType
 from .enums import LeaveTypeEnum, LeaveStatusEnum, LeaveDayTypeEnum
 from utils.graphene.enums import EnumDescription
-# from utils.graphene.fields import DjangoPaginatedListObjectField
 
 
 # def get_leave_qs(info):
@@ -42,45 +40,45 @@ class LeaveDayType(DjangoObjectType):
     type_display = EnumDescription(source='get_type_display', required=True)
 
 
-# class LeaveListType(CustomDjangoListObjectType):
-#     class Meta:
-#         model = Leave
-#         fields = (
-#             'id', 'created_by', 'start_date', 'end_date',
-#             'num_of_days', 'additional_information',
-#             'denied_reason', 'created_at', 'leave_day'
-#         )
+class LeaveListType(CustomDjangoListObjectType):
+    class Meta:
+        model = Leave
+        fields = (
+            'id', 'created_by', 'start_date', 'end_date',
+            'num_of_days', 'additional_information',
+            'denied_reason', 'created_at', 'leave_day'
+        )
 
 
-# class LeaveDayListType(CustomDjangoListObjectType):
-#     class Meta:
-#         model = Leave
-#         fields = (
-#             'id', 'date', 'additional_information',
-#         )
+class LeaveDayListType(CustomDjangoListObjectType):
+    class Meta:
+        model = LeaveDay
+        fields = (
+            'id', 'date', 'additional_information',
+        )
 
 
 class Query:
-    # leaves = DjangoPaginatedListObjectField(
-    #     LeaveListType,
-    #     pagination=PageGraphqlPagination(
-    #         page_size_query_param='pageSize'
-    #     )
-    # )
+    leaves = DjangoPaginatedListObjectField(
+        LeaveListType,
+        pagination=PageGraphqlPagination(
+            page_size_query_param='pageSize'
+        )
+    )
     leave_by_id = DjangoObjectField(LeaveType)
-    # leave_day = DjangoPaginatedListObjectField(
-    #     LeaveDayListType,
-    #     pagination=PageGraphqlPagination(
-    #         page_size_query_param='pageSize'
-    #     )
-    # )
+    leave_day = DjangoPaginatedListObjectField(
+        LeaveDayListType,
+        pagination=PageGraphqlPagination(
+            page_size_query_param='pageSize'
+        )
+    )
 
-    # def resolve_leave_day(root, info):
-    #     return LeaveDay.objects.select_related("leave").filter(created_by=info.context.user)
+    def resolve_leave_day(root, info, **kwargs):
+        return LeaveDay.objects.select_related("leave").filter(leave__created_by=info.context.user)
 
-    # def resolve_leaves(root, info):
-    #     # return get_leave_qs(info)
-    #     return Leave.objects.filter(created_by=info.context.user)
+    def resolve_leaves(root, info, **kwargs):
+        # return get_leave_qs(info)
+        return Leave.objects.filter(created_by=info.context.user)
 
     def resolve_leave_by_id(root, info, id):
         # Querying a single leave
