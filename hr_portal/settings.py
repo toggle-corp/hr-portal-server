@@ -41,7 +41,13 @@ INTERNAL_APPS = [
 ]
 
 
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = [
+    'rest_framework',
+    'graphene_django',
+    # 'graphene_django_extras',
+    'graphene_graphiql_explorer',
+    'drf_dynamic_fields',
+]
 
 
 DEV_APPS = [
@@ -50,6 +56,34 @@ DEV_APPS = [
 ]
 
 INSTALLED_APPS = INTERNAL_APPS + THIRD_PARTY_APPS + DEV_APPS
+
+GRAPHENE = {
+    'ATOMIC_MUTATIONS': True,
+    'SCHEMA': 'hr_portal.schema.schema',
+    'SCHEMA_OUTPUT': 'schema.json',  # defaults to schema.json,
+    'CAMELCASE_ERRORS': True,
+    'SCHEMA_INDENT': 2,  # Defaults to None (displays all data on a single line)
+    'MIDDLEWARE': [
+        'utils.graphene.middleware.DisableIntrospectionSchemaMiddleware',
+        'utils.sentry.SentryGrapheneMiddleware',
+        'utils.graphene.middleware.WhiteListMiddleware',
+    ],
+}
+
+GRAPHENE_DJANGO_EXTRAS = {
+    'DEFAULT_PAGINATION_CLASS': 'graphene_django_extras.paginations.PageGraphqlPagination',
+    'DEFAULT_PAGE_SIZE': 20,
+    'MAX_PAGE_SIZE': 50,
+}
+
+
+GRAPHENE_NODES_WHITELIST = (
+    '__schema',
+    '__type',
+    '__typename',
+    # custom nodes...
+    'login',
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
