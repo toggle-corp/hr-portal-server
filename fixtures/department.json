@@ -1,1 +1,35 @@
-[{"model": "user.department", "pk": 1, "fields": {"name": "Development", "email": "dev@togglecorp.com", "description": "", "logo": "", "logo_url": null}}, {"model": "user.department", "pk": 2, "fields": {"name": "Analysis", "email": "analysis@togglecorp.com", "description": "", "logo": "", "logo_url": null}}, {"model": "user.department", "pk": 3, "fields": {"name": "Operation", "email": "operation@togglecorp.com", "description": "", "logo": "", "logo_url": null}}]
+[
+    {
+        "model": "user.department",
+        "pk": 1,
+        "fields": {
+            "name": "Development",
+            "email": "dev@togglecorp.com",
+            "description": "",
+            "logo": "",
+            "logo_url": null
+        }
+    },
+    {
+        "model": "user.department",
+        "pk": 2,
+        "fields": {
+            "name": "Analysis",
+            "email": "analysis@togglecorp.com",
+            "description": "",
+            "logo": "",
+            "logo_url": null
+        }
+    },
+    {
+        "model": "user.department",
+        "pk": 3,
+        "fields": {
+            "name": "Operation",
+            "email": "operation@togglecorp.com",
+            "description": "",
+            "logo": "",
+            "logo_url": null
+        }
+    }
+]
