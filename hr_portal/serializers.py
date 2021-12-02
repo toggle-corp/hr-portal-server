@@ -1,3 +1,6 @@
+from rest_framework import serializers
+
+
 def remove_null(d):
     if not isinstance(d, (dict, list)):
         return d
@@ -27,3 +30,37 @@ class WriteOnlyOnCreateSerializerMixin():
             for field in write_only_on_create_fields:
                 fields[field].read_only = True
         return fields
+
+
+class MetaInformationSerializerMixin(serializers.Serializer):
+    """
+    Responsible to add following fields into the validated data
+    - created_by
+    - last_modified_by
+    """
+    created_at = serializers.DateTimeField(read_only=True)
+    modified_at = serializers.DateTimeField(read_only=True)
+    created_by = serializers.PrimaryKeyRelatedField(read_only=True)
+    modified_by = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    def validate(self, attrs) -> dict:
+        attrs = super().validate(attrs)
+        if self.instance is None:
+            attrs.update({
+                'created_by': self.context['request'].user
+            })
+        else:
+            attrs.update({
+                'modified_by': self.context['request'].user
+            })
+        return attrs
+
+
+class UpdateSerializerMixin:
+    """Makes all fields not required apart from the id field"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # all updates will be a patch update
+        for name in self.fields:
+            self.fields[name].required = False
+        self.fields['id'].required = True
