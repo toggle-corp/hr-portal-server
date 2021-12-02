@@ -37,7 +37,7 @@ class Leave(UserResourceModel):
     denied_reason = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.created_by}#{self.id}'
+        return f'{self.created_by} # {self.id}'
 
     def get_num_of_days(self):
         diff = self.end_date - self.start_date

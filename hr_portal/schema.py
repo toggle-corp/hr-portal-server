@@ -1,7 +1,7 @@
 import graphene
 
 from apps.user import schema as user_schema, mutation as user_mutation
-from apps.leave import schema as leave_schema
+from apps.leave import schema as leave_schema, mutation as leave_mutation
 
 
 class Query(
@@ -14,6 +14,7 @@ class Query(
 
 class Mutation(
     user_mutation.Mutation,
+    leave_mutation.Mutation,
     graphene.ObjectType
 ):
     pass

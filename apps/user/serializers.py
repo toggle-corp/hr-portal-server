@@ -30,7 +30,7 @@ class UserSerializer(WriteOnlyOnCreateSerializerMixin, serializers.ModelSerializ
         write_only_on_create_fields = ('email', 'username')
 
     def create(self, validated_data):
-        raise Exception("Sorry, Create method is not used for now")
+        raise Exception("Create method is not used for now")
 
     def update(self, instance, validated_data):
         user = super().update(instance, validated_data)

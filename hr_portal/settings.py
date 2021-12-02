@@ -28,7 +28,6 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
 
 ALLOWED_HOSTS = [os.environ['ALLOWED_HOSTS']]
 
-
 # Application definition
 
 INTERNAL_APPS = [
@@ -47,6 +46,7 @@ THIRD_PARTY_APPS = [
     # 'graphene_django_extras',
     'graphene_graphiql_explorer',
     'drf_dynamic_fields',
+    'corsheaders',
 ]
 
 
@@ -88,6 +88,7 @@ GRAPHENE_NODES_WHITELIST = (
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -180,3 +181,35 @@ if DEBUG:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS CONFIGS
+if DEBUG:
+    CORS_ORIGIN_ALLOW_ALL = True
+# else:
+#     CORS_ORIGIN_REGEX_WHITELIST = [
+#         r"^https://192.168.88.12:3010$",
+#     ]
+
+# CORS_URLS_REGEX = r'(^/api/.*$)|(^/media/.*$)|(^/graphql$)'
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+)
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)
