@@ -2,7 +2,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from hr_portal.models import UserResourceModel
-from apps.user.models import User
 
 
 class Leave(UserResourceModel):

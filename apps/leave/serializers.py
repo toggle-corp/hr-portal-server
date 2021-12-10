@@ -14,6 +14,13 @@ class IntegerIDField(serializers.IntegerField):
 
 
 class LeaveDaySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LeaveDay
+        exclude = ['id', 'leave']
+
+
+class LeaveDayUpdateSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
 
     class Meta:
@@ -22,9 +29,7 @@ class LeaveDaySerializer(serializers.ModelSerializer):
 
 
 class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSerializer):
-
     leave_days = LeaveDaySerializer(many=True)
-    # id = IntegerIDField(required=True)
 
     class Meta:
         model = Leave
@@ -45,9 +50,9 @@ class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSeri
                 'date', flat=True)
         if existed_leave_days:
             existed_leave_day_dates = [str(leave_day) for leave_day in existed_leave_days]
-            raise serializers.ValidationError(
-                'leave_exists : {}'.format(', '.join(existed_leave_day_dates))
-            )
+            raise serializers.ValidationError({
+                "date": 'Leave already exists : {}'.format(', '.join(existed_leave_day_dates))
+            })
 
         # check if numbr of paid leave days is over
         if not attrs['type'] == 6:
@@ -57,8 +62,10 @@ class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSeri
                     type=6).aggregate(Sum('num_of_days'))
             if user_leaves['num_of_days__sum']:
                 # TODO :Need to adjust total sum incase of other not countable leaves.
-                if user_leaves['num_of_days__sum'] >= 20:
-                    raise serializers.ValidationError("Total number of paid leave is over, Please apply unpaid leave")
+                if user_leaves['num_of_days__sum'] >= user.total_leaves_days:
+                    raise serializers.ValidationError({
+                        "date": "Total number of paid leave is over, Please apply unpaid leave",
+                    })
 
         return attrs
 
@@ -66,10 +73,12 @@ class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSeri
     def get_num_of_days(leave_days):
         num_of_days = 0
         for leave_day in leave_days:
-            if leave_day['type'] != 2:
-                num_of_days += 0.5
-            else:
+            if leave_day['type'] == 3:
+                num_of_days += 0
+            elif leave_day['type'] == 2:
                 num_of_days += 1
+            else:
+                num_of_days += 0.5
         return num_of_days
 
     @staticmethod
@@ -90,6 +99,8 @@ class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSeri
         validated_data['num_of_days'] = self.get_num_of_days(leave_days)
         leave = Leave.objects.create(**validated_data)
         for leave_day in leave_days:
+            if leave_day['type'] == 3:
+                continue
             LeaveDay.objects.create(leave=leave, **leave_day)
         return leave
 
@@ -118,33 +129,30 @@ class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSeri
 
 
 class LeaveUpdateSerializer(UpdateSerializerMixin, LeaveApplySerializer):
-
+    leave_days = LeaveDayUpdateSerializer(many=True)
     id = IntegerIDField(required=True)
 
     class Meta:
         model = Leave
         fields = (
             'id',
-            'start_date',
-            'end_date',
-            'status',
             'additional_information',
-            'denied_reason',
             'type',
             'leave_days'
         )
 
     def validate(self, attrs):
         user = self.context['request'].user
+        leave_days = self.remove_weekdays(attrs.pop('leave_days'))
 
         # check if leave status is approved or denied
-        date_list = [leave_day['date'] for leave_day in attrs['leave_days']]
+        date_list = [leave_day['date'] for leave_day in leave_days]
         current_leave_days = LeaveDay.objects.filter(leave=self.instance).values_list('date', flat=True)
         current_leave_status = self.instance.status
         if current_leave_status in [1, 2]:
-            raise serializers.ValidationError(
-                'You cannot update this leave request'
-            )
+            raise serializers.ValidationError({
+                'date': 'You cannot update this leave request'
+            })
 
         # check for already applied leave for additional days
         existed_leave_days = LeaveDay.objects.filter(
@@ -154,9 +162,9 @@ class LeaveUpdateSerializer(UpdateSerializerMixin, LeaveApplySerializer):
                     'date', flat=True)
         if existed_leave_days:
             existed_leave_days = [str(leave_day) for leave_day in existed_leave_days]
-            raise serializers.ValidationError(
-                'leave_exists : {}'.format(', '.join(existed_leave_days))
-            )
+            raise serializers.ValidationError({
+                'date': 'leave_exists : {}'.format(', '.join(existed_leave_days))
+            })
 
         # check if numbr of paid leave days is over
         if not attrs['type'] == 6:
@@ -164,7 +172,14 @@ class LeaveUpdateSerializer(UpdateSerializerMixin, LeaveApplySerializer):
                 status=1,
                 created_by=user).exclude(type=6).aggregate(Sum('num_of_days'))
             # TODO :Need to adjust total sum incase of other not countable leaves.
-            if total_number_of_days_applied['num_of_days__sum'] >= 20:
-                raise serializers.ValidationError("Total number of paid leave is over, Please apply unpaid leave")
+            if (total_number_of_days_applied['num_of_days__sum'] >= user.total_leaves_days):
+                raise serializers.ValidationError({
+                    'date': "Total number of paid leave is over, Please apply unpaid leave"
+                })
+            if (total_number_of_days_applied['num_of_days__sum'] + self.get_num_of_days(leave_days)) \
+                    > user.total_leaves_days:
+                raise serializers.ValidationError({
+                    "date": "Number of leave days applied exceeds total number of leave days allocated "
+                })
 
         return attrs

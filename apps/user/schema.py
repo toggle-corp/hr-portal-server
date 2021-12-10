@@ -17,7 +17,7 @@ class UserType(DjangoObjectType):
     class Meta:
         model = User
         fields = (
-            'id', 'first_name', 'last_name', 'email', 'primary_email', 'secondary_email',
+            'id', 'username', 'first_name', 'last_name', 'email', 'primary_email', 'secondary_email',
             'address', 'primary_phone_number', 'secondary_phone_number', 'joined_at', 'birthday'
         )
         filterset_class = UserFilterSet
@@ -37,10 +37,12 @@ class UserMeType(DjangoObjectType):
         model = User
         skip_registry = True
         fields = (
-            'id', 'first_name', 'last_name', 'is_active', 'gender',
+            'id', 'first_name', 'last_name', 'is_active',
             'email', 'last_login', 'total_leaves_days',
 
         )
+    gender = graphene.Field(UserGenderEnum, required=True)
+    gender_display = EnumDescription(source='get_gender_display', required=True)
     remaining_leave = graphene.String()
     total_leaves_days = graphene.String()
 

@@ -42,7 +42,7 @@ class LeaveApply(graphene.Mutation):
 
 class LeaveUpdate(graphene.Mutation):
     class Arguments:
-        data = LeaveApplyInputType(required=True)
+        data = LeaveUpdateInputType(required=True)
 
     errors = graphene.List(graphene.NonNull(CustomErrorType))
     ok = graphene.Boolean()

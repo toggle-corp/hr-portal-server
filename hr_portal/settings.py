@@ -27,6 +27,7 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
 
 ALLOWED_HOSTS = [os.environ['ALLOWED_HOSTS']]
+APP_HOST = os.environ.get('APP_HOST', 'http://localhost:8050')
 
 # Application definition
 
@@ -101,7 +102,7 @@ ROOT_URLCONF = 'hr_portal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join('apps', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -182,6 +183,12 @@ if DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+EMAIL_FROM = os.environ.get('EMAIL_FROM')
+
+# STATIC EMAILS (TC)
+HR_EMAIL = os.environ.get('HR_EMAIL', 'HR <hr@togglecorp.com>')
+MANAGEMENT_EMAIL = os.environ.get('MANAGEMENT_EMAIL', 'Management <management@togglecorp.com>')
+
 # CORS CONFIGS
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
@@ -213,3 +220,19 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+
+USE_SES_EMAIL_BACKEND = os.environ.get('USE_SES_EMAIL_BACKEND', 'false').lower() == 'true'
+if not USE_SES_EMAIL_BACKEND:
+    """
+    DUMP THE EMAIL TO CONSOLE
+    """
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    """
+    Use AWS SES
+    """
+    EMAIL_BACKEND = 'django_ses.SESBackend'
+    # If environment variable are not provided, then EC2 Role will be used.
+    AWS_SES_ACCESS_KEY_ID = os.environ.get('SES_AWS_ACCESS_KEY_ID')
+    AWS_SES_SECRET_ACCESS_KEY = os.environ.get('SES_AWS_SECRET_ACCESS_KEY')

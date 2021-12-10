@@ -1,0 +1,4 @@
+{% load i18n %}
+{% autoescape off %}
+Leave Notification {{leave.created_by.full_name}}#{{leave.id}}
+{% endautoescape %}

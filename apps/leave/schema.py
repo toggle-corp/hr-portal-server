@@ -72,7 +72,7 @@ class Query:
     today_on_leave = graphene.List(LeaveDayType)
 
     def resolve_leaves(root, info, **kwargs):
-        return Leave.objects.filter(created_by=info.context.user)
+        return Leave.objects.filter(created_by=info.context.user).order_by('-created_at')
 
     def resolve_leave(root, info, id):
         return Leave.objects.get(pk=id)
