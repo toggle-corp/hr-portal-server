@@ -143,48 +143,83 @@ class TestLeaveMutation(GraphQLTestCase):
             input_data=self.input
         )
         content = json.loads(response.content)
-        print(content)
         self.assertResponseNoErrors(response)
         self.assertTrue(content['data']['leaveApply']['ok'], content)
         self.assertIsNone(content['data']['leaveApply']['errors'], content)
-        self.assertIsNotNone(content['data']['leaveApply']['results']['id'])
-        # self.assertEqual(content['data']['leaveApply']['results']['id']),
-        #                 content['data']['leaveApply']['results']['leave_days'][0]['leave']['id'])
+        self.assertIsNotNone(content['data']['leaveApply']['result']['id'])
+        self.assertEqual(
+            content['data']['leaveApply']['result']['startDate'],
+            content['data']['leaveApply']['result']['leaveDay'][0]['date']
+            )
+        self.assertEqual(
+            content['data']['leaveApply']['result']['endDate'],
+            content['data']['leaveApply']['result']['leaveDay'][-1]['date']
+            )
+        self.assertIsNotNone(content['data']['leaveApply']['result']['leaveDay'][0]['id'])
 
+    def test_update_leave(self):
+        self.apply_leave_input = {
+            "additionalInformation": "This is a test leave",
+            "type": "SICK",
+            "leaveDays": [
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-01-04",
+                    "type": "FULL",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-01-05",
+                    "type": "FULL",
+                }
+            ]
+        }
 
+        # Try with real user
+        user = self.created_by
 
-    # def test_update_leave(self):
-    #     self.apply_leave_input = {
-    #         "additionalInformation": "This is a test leave",
-    #         "type": "SICK",
-    #         "leaveDays": [
-    #             {
-    #                 "additionalInformation": "This is a test information",
-    #                 "date": "2021-01-04",
-    #                 "type": "FULL",
-    #             },
-    #             {
-    #                 "additionalInformation": "This is a test information",
-    #                 "date": "2021-01-05",
-    #                 "type": "FULL",
-    #             }
-    #         ]
-    #     }
-    #     # Without Login session
-    #     self.query_check(
-    #         self.CREATE_UPDATE_QUERY,
-    #         input_data=self.input,
-    #         assert_for_error=True
-    #     )
+        # Login
+        self.force_login(user)
 
-    #     # Try with real user
-    #     user = self.created_by
+        #  create a leave
+        apply_leave_response = self.query(
+            self.CREATE_LEAVE_QUERY,
+            input_data=self.apply_leave_input
+        )
+        leave_apply_content = json.loads(apply_leave_response.content)
+        leave_id = leave_apply_content['data']['leaveApply']['result']['id']
 
-    #     # Login
-    #     self.force_login(user)
-    #     apply_leave_response = self.query(
-    #         self.CREATE_LEAVE_QUERY,
-    #         input_data=self.input
-    #     )
-    #     leave_apply_content = json.loads(apply_leave_response.content)
-    #     self.assertResponseNoErrors(response)
+        leave_days = leave_apply_content['data']['leaveApply']['result']['leaveDay']
+        leave_day_id_list = [leave_day['id'] for leave_day in leave_days]
+
+        self.update_leave_input = {
+            "id": leave_id,
+            "additionalInformation": "This is a test update leave",
+            "type": "SICK",
+            "leaveDays": [
+                {
+                    "id": leave_day_id_list[0],
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-01-04",
+                    "type": "FULL",
+                },
+                {
+                    "id": leave_day_id_list[1],
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-01-05",
+                    "type": "FIRST_HALF",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-01-06",
+                    "type": "FULL",
+                }
+            ]
+        }
+        update_leave_response = self.query(
+            self.UPDATE_LEAVE_QUERY,
+            input_data=self.update_leave_input
+        )
+        leave_update_content = json.loads(update_leave_response.content)
+        #  Should not be able to update leave that is already approved or Denied
+        self.assertFalse(leave_update_content['data']['leaveUpdate'['ok']])
