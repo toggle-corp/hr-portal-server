@@ -107,9 +107,6 @@ class TestLeaveMutation(GraphQLTestCase):
 
     def setUp(self):
         self.created_by = UserFactory.create()
-        super().setUp()
-
-    def test_apply_leave(self):
         self.input = {
             "additionalInformation": "This is a test leave",
             "type": "SICK",
@@ -126,6 +123,10 @@ class TestLeaveMutation(GraphQLTestCase):
                 }
             ]
         }
+        super().setUp()
+
+    def test_apply_leave(self):
+
         # Without Login session
         self.query_check(
             self.CREATE_LEAVE_QUERY,
@@ -150,12 +151,34 @@ class TestLeaveMutation(GraphQLTestCase):
         self.assertEqual(
             content['data']['leaveApply']['result']['startDate'],
             content['data']['leaveApply']['result']['leaveDay'][0]['date']
-            )
+        )
         self.assertEqual(
             content['data']['leaveApply']['result']['endDate'],
             content['data']['leaveApply']['result']['leaveDay'][-1]['date']
-            )
+        )
         self.assertIsNotNone(content['data']['leaveApply']['result']['leaveDay'][0]['id'])
+
+    def test_validate_apply_leave(self):
+
+        # Without Login session
+        self.query_check(
+            self.CREATE_LEAVE_QUERY,
+            input_data=self.input,
+            assert_for_error=True
+        )
+        # Try with real user
+        user = self.created_by
+
+        # Login
+        self.force_login(user)
+        response = self.query(
+            self.CREATE_LEAVE_QUERY,
+            input_data=self.input
+        )
+        
+
+
+
 
     def test_update_leave(self):
         self.apply_leave_input = {
@@ -222,4 +245,4 @@ class TestLeaveMutation(GraphQLTestCase):
         )
         leave_update_content = json.loads(update_leave_response.content)
         #  Should not be able to update leave that is already approved or Denied
-        self.assertFalse(leave_update_content['data']['leaveUpdate'['ok']])
+        self.assertFalse(leave_update_content['data']['leaveUpdate']['ok'])

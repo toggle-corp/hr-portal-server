@@ -22,7 +22,7 @@ class LoginSerializer(serializers.Serializer):
 
             if user is None:
                 raise serializers.ValidationError({
-                    "password": 'Password doesnot match'
+                    "password": 'Password does not match'
                 })
             data['user'] = user
             return data
