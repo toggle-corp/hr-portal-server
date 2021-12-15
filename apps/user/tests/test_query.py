@@ -37,3 +37,4 @@ class TestUserQuery(GraphQLTestCase):
         content = self.query_check(self.query_me)
         self.assertIdEqual(content['data']['me']['id'], user.id, content)
         self.assertEqual(content['data']['me']['email'], user.email, content)
+        self.assertEqual(content['data']['me']['totalLeavesDays'], str(user.total_leaves_days))

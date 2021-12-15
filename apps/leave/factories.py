@@ -1,10 +1,8 @@
-import factory
 import datetime
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
 from .models import Leave, LeaveDay
-from apps.user.factories import UserFactory
 
 
 class LeaveDayFactory(DjangoModelFactory):

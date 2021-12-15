@@ -1,7 +1,6 @@
 import json
 
 from utils.graphene.tests import GraphQLTestCase
-# from aaps.leave.factories import LeaveFactory
 from apps.user.factories import UserFactory
 
 
@@ -113,12 +112,12 @@ class TestLeaveMutation(GraphQLTestCase):
             "leaveDays": [
                 {
                     "additionalInformation": "This is a test information",
-                    "date": "2021-01-03",
+                    "date": "2021-01-04",
                     "type": "FULL",
                 },
                 {
                     "additionalInformation": "This is a test information",
-                    "date": "2021-01-04",
+                    "date": "2021-01-05",
                     "type": "FULL",
                 }
             ]
@@ -159,7 +158,6 @@ class TestLeaveMutation(GraphQLTestCase):
         self.assertIsNotNone(content['data']['leaveApply']['result']['leaveDay'][0]['id'])
 
     def test_validate_apply_leave(self):
-
         # Without Login session
         self.query_check(
             self.CREATE_LEAVE_QUERY,
@@ -171,33 +169,22 @@ class TestLeaveMutation(GraphQLTestCase):
 
         # Login
         self.force_login(user)
+
         response = self.query(
             self.CREATE_LEAVE_QUERY,
             input_data=self.input
         )
-        
-
-
-
+        content = json.loads(response.content)
+        self.assertTrue(content['data']['leaveApply']['ok'])
+        response = self.query(
+            self.CREATE_LEAVE_QUERY,
+            input_data=self.input
+        )
+        content = json.loads(response.content)
+        #  Should not be able to apply already existing leave
+        self.assertFalse(content['data']['leaveApply']['ok'])
 
     def test_update_leave(self):
-        self.apply_leave_input = {
-            "additionalInformation": "This is a test leave",
-            "type": "SICK",
-            "leaveDays": [
-                {
-                    "additionalInformation": "This is a test information",
-                    "date": "2021-01-04",
-                    "type": "FULL",
-                },
-                {
-                    "additionalInformation": "This is a test information",
-                    "date": "2021-01-05",
-                    "type": "FULL",
-                }
-            ]
-        }
-
         # Try with real user
         user = self.created_by
 
@@ -207,7 +194,7 @@ class TestLeaveMutation(GraphQLTestCase):
         #  create a leave
         apply_leave_response = self.query(
             self.CREATE_LEAVE_QUERY,
-            input_data=self.apply_leave_input
+            input_data=self.input
         )
         leave_apply_content = json.loads(apply_leave_response.content)
         leave_id = leave_apply_content['data']['leaveApply']['result']['id']

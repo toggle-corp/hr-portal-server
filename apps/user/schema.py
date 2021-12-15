@@ -53,7 +53,10 @@ class UserMeType(DjangoObjectType):
             status=1,
             created_by=info.context.user).exclude(
                 type=6).aggregate(Sum('num_of_days'))
-        remaining_leave = user.total_leaves_days - float(user_leaves['num_of_days__sum'])
+        if user_leaves['num_of_days__sum']:
+            remaining_leave = user.total_leaves_days - float(user_leaves['num_of_days__sum'])
+        else:
+            remaining_leave = user.total_leaves_days
         return remaining_leave
 
     @staticmethod
