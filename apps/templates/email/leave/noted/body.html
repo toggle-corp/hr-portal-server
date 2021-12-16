@@ -1,0 +1,26 @@
+{% extends 'email/base.html' %}
+
+{% block content %}
+<div style="clear: right; text-align: left; word-wrap: break-word;">
+    <p>
+        <span>
+            Dear <b>{{leave.created_by.full_name}}</b>,
+        </span>
+    </p>
+    <p>
+        <span>
+            Your <b>{{leave.get_type_display}}</b> leave has been noted for <b>{{leave.num_of_days}}</b>
+            starting from {{leave.start_date|default:"N/A"}} to {{leave.end_date|default:"N/A"}}.
+        </span>
+    </p>
+    <div>
+        Additional Information: <b><pre>{{leave.additional_information}}</pre></b>
+    </div>
+    <p>
+        <span>
+            Regards
+        </span>
+    </p>
+</div>
+
+{% endblock %}

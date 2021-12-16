@@ -1,0 +1,8 @@
+Dear {{leave.created_by.full_name}},
+
+Your {{leave.get_type_display}} leave has been noted for {{leave.num_of_days}}
+starting from {{leave.start_date|default:"N/A"}} to {{leave.end_date|default:"N/A"}}.
+
+Additional Information: {{leave.additional_information}}
+
+Regards

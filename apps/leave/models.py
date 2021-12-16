@@ -28,7 +28,7 @@ class Leave(UserResourceModel):
 
     type = models.IntegerField(choices=Type.choices)
     status = models.IntegerField(
-        choices=Status.choices, default=Status.PENDING
+        choices=Status.choices, default=Status.APPROVED
     )
     num_of_days = models.FloatField(verbose_name='number of days(Auto-calculated)', blank=True)
     start_date = models.DateField(null=True, verbose_name='start date(Auto-calculated)')
@@ -37,15 +37,7 @@ class Leave(UserResourceModel):
     denied_reason = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.created_by}#{self.id}'
-
-    def get_num_of_days(self):
-        diff = self.end_date - self.start_date
-        return diff.days + 1
-
-    def save(self, *args, **kwargs):
-        self.num_of_days = self.get_num_of_days()
-        return super().save(*args, **kwargs)
+        return f'{self.created_by} # {self.id}'
 
 
 class LeaveDay(models.Model):
@@ -53,6 +45,7 @@ class LeaveDay(models.Model):
         FIRST_HALF = 0, _('First half')
         SECOND_HALF = 1, _('Second half')
         FULL = 2, _('Full')
+        NO_LEAVE = 3, _('No Leave')
 
     leave = models.ForeignKey(Leave, on_delete=models.CASCADE, related_name="leave_days")
     date = models.DateField()

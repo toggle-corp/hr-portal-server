@@ -30,6 +30,12 @@ class User(AbstractUser):
         return self.get_full_name()
 
     @property
+    def total_leaves_days(self):
+        if self.gender == User.Gender.FEMALE:
+            return 24  # 4+ Maternity Leave
+        return 20
+
+    @property
     def full_name(self):
         return self.get_full_name()
 

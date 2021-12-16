@@ -1,29 +1,23 @@
 from utils.graphene.tests import GraphQLTestCase
 from apps.user.factories import UserFactory
+from apps.leave.factories import LeaveFactory
 
 
 class TestUserQuery(GraphQLTestCase):
     def setUp(self):
         self.query_me = '''
-            query Query {
+            query MyQuery {
                 me {
-                    id
-                    gender
-                    firstName
-                    lastName
-                    username
-                    secondaryPhoneNumber
-                    secondaryEmail
-                    primaryPhoneNumber
-                    primaryEmail
-                    joinedAt
-                    isSuperuser
-                    genderDisplay
                     email
-                    birthday
-                    avatarUrl
-                    avatar
-                    address
+                    firstName
+                    gender
+                    genderDisplay
+                    id
+                    isActive
+                    lastName
+                    lastLogin
+                    remainingLeave
+                    totalLeavesDays
                 }
             }
         '''
@@ -38,7 +32,9 @@ class TestUserQuery(GraphQLTestCase):
 
         # Login
         self.force_login(user)
+        LeaveFactory.create_batch(5, created_by=user)
 
         content = self.query_check(self.query_me)
         self.assertIdEqual(content['data']['me']['id'], user.id, content)
         self.assertEqual(content['data']['me']['email'], user.email, content)
+        self.assertEqual(content['data']['me']['totalLeavesDays'], str(user.total_leaves_days))
