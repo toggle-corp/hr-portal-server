@@ -18,6 +18,13 @@ def remove_null(d):
     }
 
 
+class IntegerIDField(serializers.IntegerField):
+    """
+    This field is created to override the graphene conversion of the integerfield
+    """
+    pass
+
+
 class WriteOnlyOnCreateSerializerMixin():
     """
     Allow to define fields only writable on creation

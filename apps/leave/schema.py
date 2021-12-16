@@ -1,6 +1,6 @@
 import graphene
-from typing import Union
 from datetime import date
+from typing import Union
 from graphene_django import DjangoObjectType
 from graphene_django_extras import DjangoObjectField, PageGraphqlPagination
 
@@ -14,6 +14,11 @@ DAYS_TYPE = {
     "ONE_DAY": "One Day",
     "MULTIPLE_DAY": "Multiple Days"
 }
+
+
+def get_leave_qs(info):
+    leave_qs = Leave.objects.filter(created_by=info.context.user).order_by('-created_at')
+    return leave_qs
 
 
 class LeaveDayType(DjangoObjectType):
@@ -45,6 +50,10 @@ class LeaveType(DjangoObjectType):
     leave_day = graphene.List(LeaveDayType, required=True)
     request_day_type = graphene.String()
 
+    @staticmethod
+    def get_custom_queryset(queryset, info, **kwargs):
+        return get_leave_qs(info)
+
     def resolve_leave_day(root, info, **kwargs) -> Union[str, None]:
         return LeaveDay.objects.select_related("leave").filter(leave=root)
 
@@ -72,10 +81,7 @@ class Query:
     today_on_leave = graphene.List(LeaveDayType)
 
     def resolve_leaves(root, info, **kwargs):
-        return Leave.objects.filter(created_by=info.context.user).order_by('-created_at')
-
-    def resolve_leave(root, info, id):
-        return Leave.objects.get(pk=id)
+        return get_leave_qs(info)
 
     def resolve_today_on_leave(root, info):
         return LeaveDay.objects.filter(date=date.today())

@@ -45,6 +45,7 @@ class TestLeaveMutation(GraphQLTestCase):
                             id
                             type
                             typeDisplay
+                            user
                         }
                         numOfDays
                         requestDayType
@@ -124,6 +125,68 @@ class TestLeaveMutation(GraphQLTestCase):
         }
         super().setUp()
 
+    def test_validate_apply_leave(self):
+        # Without Login session
+        self.query_check(
+            self.CREATE_LEAVE_QUERY,
+            input_data=self.input,
+            assert_for_error=True
+        )
+        # Try with real user
+        user = self.created_by
+
+        # Login
+        self.force_login(user)
+
+        response = self.query(
+            self.CREATE_LEAVE_QUERY,
+            input_data=self.input
+        )
+        content = json.loads(response.content)
+        self.assertTrue(content['data']['leaveApply']['ok'])
+        response = self.query(
+            self.CREATE_LEAVE_QUERY,
+            input_data=self.input
+        )
+        content = json.loads(response.content)
+        #  Should not be able to apply already existing leave
+        self.assertFalse(content['data']['leaveApply']['ok'])
+
+    def test_validate_weekdays(self):
+        # validate for leave apply with weekdays
+        input = {
+            "additionalInformation": "This is a test leave",
+            "type": "SICK",
+            "leaveDays": [
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-18",  # Saturday
+                    "type": "FULL",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-19",  # Sunday
+                    "type": "FULL",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-25",  # Sunday
+                    "type": "FULL",
+                }
+            ]
+        }
+        # Try with real user
+        user = self.created_by
+
+        # Login
+        self.force_login(user)
+        response = self.query(
+            self.CREATE_LEAVE_QUERY,
+            input_data=input
+        )
+        content = json.loads(response.content)
+        self.assertFalse(content['data']['leaveApply']['ok'])
+
     def test_apply_leave(self):
 
         # Without Login session
@@ -156,33 +219,98 @@ class TestLeaveMutation(GraphQLTestCase):
             content['data']['leaveApply']['result']['leaveDay'][-1]['date']
         )
         self.assertIsNotNone(content['data']['leaveApply']['result']['leaveDay'][0]['id'])
+        self.assertEqual(content['data']['leaveApply']['result']['numOfDays'], 2)
 
-    def test_validate_apply_leave(self):
-        # Without Login session
-        self.query_check(
-            self.CREATE_LEAVE_QUERY,
-            input_data=self.input,
-            assert_for_error=True
-        )
-        # Try with real user
-        user = self.created_by
-
-        # Login
-        self.force_login(user)
+        # Try with both non weekdays and leave days in a single request
+        input = {
+            "additionalInformation": "This is a test leave both week days and non weekdays",
+            "type": "SICK",
+            "leaveDays": [
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-18",  # Saturday
+                    "type": "FULL",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-19",  # sunday
+                    "type": "FULL",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-20",  # Monday
+                    "type": "FULL",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-21",  # Tuesday
+                    "type": "FIRST_HALF",
+                }
+            ]
+        }
 
         response = self.query(
             self.CREATE_LEAVE_QUERY,
-            input_data=self.input
+            input_data=input
         )
         content = json.loads(response.content)
-        self.assertTrue(content['data']['leaveApply']['ok'])
+        self.assertResponseNoErrors(response)
+        self.assertTrue(content['data']['leaveApply']['ok'], content)
+        self.assertIsNone(content['data']['leaveApply']['errors'], content)
+        self.assertIsNotNone(content['data']['leaveApply']['result']['id'])
+        self.assertEqual(
+            content['data']['leaveApply']['result']['startDate'],
+            content['data']['leaveApply']['result']['leaveDay'][0]['date']
+        )
+        self.assertEqual(
+            content['data']['leaveApply']['result']['endDate'],
+            content['data']['leaveApply']['result']['leaveDay'][-1]['date']
+        )
+        self.assertIsNotNone(content['data']['leaveApply']['result']['leaveDay'][0]['id'])
+        self.assertEqual(content['data']['leaveApply']['result']['numOfDays'], 1.5)
+
+        # Try with LeaveDay type = NO_LEAVE between two days
+        input = {
+            "additionalInformation": "This is a test leave both week days and non weekdays",
+            "type": "SICK",
+            "leaveDays": [
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-28",
+                    "type": "SECOND_HALF",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-29",
+                    "type": "NO_LEAVE",
+                },
+                {
+                    "additionalInformation": "This is a test information",
+                    "date": "2021-12-30",
+                    "type": "FIRST_HALF",
+                }
+            ]
+        }
+
         response = self.query(
             self.CREATE_LEAVE_QUERY,
-            input_data=self.input
+            input_data=input
         )
         content = json.loads(response.content)
-        #  Should not be able to apply already existing leave
-        self.assertFalse(content['data']['leaveApply']['ok'])
+        self.assertResponseNoErrors(response)
+        self.assertTrue(content['data']['leaveApply']['ok'], content)
+        self.assertIsNone(content['data']['leaveApply']['errors'], content)
+        self.assertIsNotNone(content['data']['leaveApply']['result']['id'])
+        self.assertEqual(
+            content['data']['leaveApply']['result']['startDate'],
+            content['data']['leaveApply']['result']['leaveDay'][0]['date']
+        )
+        self.assertEqual(
+            content['data']['leaveApply']['result']['endDate'],
+            content['data']['leaveApply']['result']['leaveDay'][-1]['date']
+        )
+        self.assertIsNotNone(content['data']['leaveApply']['result']['leaveDay'][0]['id'])
+        self.assertEqual(content['data']['leaveApply']['result']['numOfDays'], 1)
 
     def test_update_leave(self):
         # Try with real user

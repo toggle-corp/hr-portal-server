@@ -1,5 +1,6 @@
 from utils.graphene.tests import GraphQLTestCase
 from apps.user.factories import UserFactory
+from apps.user.models import User
 from apps.leave.factories import LeaveFactory
 
 
@@ -16,8 +17,6 @@ class TestUserQuery(GraphQLTestCase):
                     isActive
                     lastName
                     lastLogin
-                    remainingLeave
-                    totalLeavesDays
                 }
             }
         '''
@@ -28,13 +27,12 @@ class TestUserQuery(GraphQLTestCase):
         self.query_check(self.query_me, assert_for_error=True)
 
         # Try with real user
-        user = UserFactory.create()
+        user = UserFactory.create(gender=User.Gender.MALE)
 
         # Login
         self.force_login(user)
-        LeaveFactory.create_batch(5, created_by=user)
+        LeaveFactory.create_batch(6, created_by=user)
 
         content = self.query_check(self.query_me)
         self.assertIdEqual(content['data']['me']['id'], user.id, content)
         self.assertEqual(content['data']['me']['email'], user.email, content)
-        self.assertEqual(content['data']['me']['totalLeavesDays'], str(user.total_leaves_days))
