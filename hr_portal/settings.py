@@ -197,7 +197,6 @@ if DEBUG:
 #         r"^https://192.168.88.12:3010$",
 #     ]
 
-# CORS_URLS_REGEX = r'(^/api/.*$)|(^/media/.*$)|(^/graphql$)'
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = (

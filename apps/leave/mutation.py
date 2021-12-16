@@ -2,7 +2,6 @@ import graphene
 
 from utils.graphene.error_types import mutation_is_not_valid, CustomErrorType
 from utils.graphene.mutation import generate_input_type_for_serializer
-
 from .serializers import (
     LeaveApplySerializer,
     LeaveUpdateSerializer

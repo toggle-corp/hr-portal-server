@@ -20,7 +20,7 @@ class LeaveDayType(DjangoObjectType):
     class Meta:
         model = LeaveDay
         fields = (
-            'id', 'date', 'additional_information', 'user',
+            'id', 'date', 'additional_information',
         )
     type = graphene.Field(LeaveDayTypeEnum, required=True)
     type_display = EnumDescription(source='get_type_display', required=True)

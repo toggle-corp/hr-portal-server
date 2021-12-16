@@ -1,5 +1,4 @@
 from typing import Union
-from apps.user.models import User
 import graphene
 from django.db.models import Sum
 from graphene_django import DjangoObjectType
@@ -11,6 +10,7 @@ from utils.graphene.fields import DjangoPaginatedListObjectField
 from utils.graphene.types import CustomDjangoListObjectType
 from .filters import UserFilterSet
 from apps.leave.models import Leave
+from apps.user.models import User
 
 
 class UserType(DjangoObjectType):
@@ -50,9 +50,9 @@ class UserMeType(DjangoObjectType):
     def resolve_remaining_leave(root, info, **kwargs) -> Union[str, None]:
         user = info.context.user
         user_leaves = Leave.objects.filter(
-            status=1,
+            status=Leave.Status.APPROVED,
             created_by=info.context.user).exclude(
-                type=6).aggregate(Sum('num_of_days'))
+                type=Leave.Type.UNPAID).aggregate(Sum('num_of_days'))
         if user_leaves['num_of_days__sum']:
             remaining_leave = user.total_leaves_days - float(user_leaves['num_of_days__sum'])
         else:
