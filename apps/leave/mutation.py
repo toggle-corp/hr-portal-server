@@ -1,7 +1,10 @@
 import graphene
+from django.utils.translation import gettext
+from django.core.exceptions import ObjectDoesNotExist
 
 from utils.graphene.error_types import mutation_is_not_valid, CustomErrorType
 from utils.graphene.mutation import generate_input_type_for_serializer
+
 from .serializers import (
     LeaveApplySerializer,
     LeaveUpdateSerializer
@@ -49,7 +52,12 @@ class LeaveUpdate(graphene.Mutation):
 
     @staticmethod
     def mutate(root, info, data):
-        instance = Leave.objects.get(id=data['id'])
+        try:
+            instance = Leave.objects.get(id=data['id'])
+        except ObjectDoesNotExist:
+            return LeaveUpdate(errors=[
+                dict(field='nonFieldErrors', messages=gettext('Leave does not exist.'))
+            ])
         serializer = LeaveUpdateSerializer(
             instance=instance,
             data=data,

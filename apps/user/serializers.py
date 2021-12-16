@@ -12,20 +12,11 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        user_obj = User.objects.filter(username=data['username'])
-        if not user_obj:
-            raise serializers.ValidationError({
-                "username": 'Invalid username'
-            })
-        else:
-            user = authenticate(username=data['username'], password=data['password'])
-
-            if user is None:
-                raise serializers.ValidationError({
-                    "password": 'Password does not match'
-                })
-            data['user'] = user
-            return data
+        user = authenticate(username=data['username'], password=data['password'])
+        if user is None:
+            raise serializers.ValidationError("Invalid username or password")
+        data['user'] = user
+        return data
 
 
 class UserSerializer(WriteOnlyOnCreateSerializerMixin, serializers.ModelSerializer):

@@ -1,16 +1,11 @@
+import datetime
 from rest_framework import serializers
 from django.db import transaction
 from django.db.models import Sum
 
 from .models import Leave, LeaveDay
 from hr_portal.serializers import UpdateSerializerMixin, MetaInformationSerializerMixin
-
-
-class IntegerIDField(serializers.IntegerField):
-    """
-    This field is created to override the graphene conversion of the integerfield
-    """
-    pass
+from hr_portal.serializers import IntegerIDField
 
 
 class LeaveDaySerializer(serializers.ModelSerializer):
@@ -41,22 +36,31 @@ class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSeri
 
     def validate(self, attrs):
         user = self.context['request'].user
+        leave_days = self.remove_weekdays(attrs['leave_days'])
+
+        # check if applied leave-days are all weekdays
+        if len(leave_days) == 0:
+            raise serializers.ValidationError({
+                "start_date": "Cannot apply leave on weekdays"
+            })
 
         # check for already applied leave
-        date_list = [leave_day['date'] for leave_day in attrs['leave_days']]
+        date_list = [leave_day['date'] for leave_day in leave_days]
         existed_leave_days = LeaveDay.objects.filter(
             date__in=date_list,
-            leave__created_by=user).values_list(
-                'date', flat=True)
+            leave__created_by=user
+        ).values_list('date', flat=True)
+
         if existed_leave_days:
             existed_leave_day_dates = [str(leave_day) for leave_day in existed_leave_days]
             raise serializers.ValidationError({
                 "start_date": 'Leave already exists : {}'.format(', '.join(existed_leave_day_dates))
             })
 
-        # check if numbr of paid leave days is over
+        # check if number of paid leave days is over
         if not attrs['type'] == Leave.Type.UNPAID:
             user_leaves = Leave.objects.filter(
+                created_at__date__year=datetime.date.today().year,
                 status=Leave.Status.APPROVED,
                 created_by=user).exclude(
                     type=Leave.Type.UNPAID).aggregate(Sum('num_of_days'))
@@ -91,8 +95,7 @@ class LeaveApplySerializer(MetaInformationSerializerMixin, serializers.ModelSeri
 
     @transaction.atomic
     def create(self, validated_data):
-        request = self.context.get('request')
-        validated_data['created_by'] = request.user
+        validated_data['created_by'] = self.context['request'].user
         leave_days = self.remove_weekdays(validated_data.pop('leave_days'))
         validated_data['start_date'] = leave_days[0]['date']
         validated_data['end_date'] = leave_days[-1]['date']
@@ -145,6 +148,12 @@ class LeaveUpdateSerializer(UpdateSerializerMixin, LeaveApplySerializer):
         user = self.context['request'].user
         leave_days = self.remove_weekdays(attrs.pop('leave_days'))
 
+        # check if applied leave-days are all weekdays
+        if len(leave_days) == 0:
+            raise serializers.ValidationError({
+                "start_date": "Cannot apply leave on weekdays"
+            })
+
         # check if leave status is approved or denied
         date_list = [leave_day['date'] for leave_day in leave_days]
         current_leave_days = LeaveDay.objects.filter(leave=self.instance).values_list('date', flat=True)
@@ -169,6 +178,7 @@ class LeaveUpdateSerializer(UpdateSerializerMixin, LeaveApplySerializer):
         # check if numbr of paid leave days is over
         if not attrs['type'] == Leave.Type.UNPAID:
             total_number_of_days_applied = Leave.objects.filter(
+                created_at__date__year=datetime.date.today().year,
                 status=Leave.Status.APPROVED,
                 created_by=user).exclude(type=Leave.Type.UNPAID).aggregate(Sum('num_of_days'))
             # TODO :Need to adjust total sum incase of other not countable leaves.

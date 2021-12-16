@@ -9,11 +9,22 @@ class TestUserMutation(GraphQLTestCase):
               login(data: $input) {
                 ok
                 result {
-                  id
-                  username
-                  primaryEmail
-                  firstName
-                  lastName
+                    username
+                    totalLeavesDays
+                    secondaryPhoneNumber
+                    secondaryEmail
+                    remainingLeave
+                    primaryPhoneNumber
+                    primaryEmail
+                    lastName
+                    joinedAt
+                    id
+                    genderDisplay
+                    gender
+                    firstName
+                    email
+                    birthday
+                    address
                 }
               }
             }

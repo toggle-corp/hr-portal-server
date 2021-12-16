@@ -73,5 +73,6 @@ class TestLeaveQuery(GraphQLTestCase):
         # Login
         self.force_login(user2)
         content = self.query_check(self.query_leave)
+
         # new authenticated leave count has to be 0
         self.assertEqual(len(content['data']['leaves']['results']), 0, content)
