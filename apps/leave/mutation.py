@@ -42,7 +42,7 @@ class LeaveApply(graphene.Mutation):
         )
 
 
-class LeaveUpdate(graphene.Mutation):
+class UpdateLeaveApply(graphene.Mutation):
     class Arguments:
         data = LeaveUpdateInputType(required=True)
 
@@ -55,7 +55,7 @@ class LeaveUpdate(graphene.Mutation):
         try:
             instance = Leave.objects.get(id=data['id'])
         except ObjectDoesNotExist:
-            return LeaveUpdate(errors=[
+            return UpdateLeaveApply(errors=[
                 dict(field='nonFieldErrors', messages=gettext('Leave does not exist.'))
             ])
         serializer = LeaveUpdateSerializer(
@@ -65,11 +65,11 @@ class LeaveUpdate(graphene.Mutation):
             partial=True
         )
         if errors := mutation_is_not_valid(serializer):
-            return LeaveUpdate(errors=errors, ok=False)
+            return UpdateLeaveApply(errors=errors, ok=False)
         serializer.save()
-        return LeaveUpdate(result=serializer.instance, errors=None, ok=True)
+        return UpdateLeaveApply(result=serializer.instance, errors=None, ok=True)
 
 
 class Mutation():
     leave_apply = LeaveApply.Field()
-    leave_update = LeaveUpdate.Field()
+    leave_update = UpdateLeaveApply.Field()

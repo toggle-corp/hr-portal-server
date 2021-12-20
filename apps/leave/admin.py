@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from apps.leave.models import Leave, LeaveDay
 # Register your models here.
 

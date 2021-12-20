@@ -1,8 +1,9 @@
+from rest_framework import serializers
+from django.contrib.auth import authenticate
+
 from hr_portal.serializers import (
     WriteOnlyOnCreateSerializerMixin,
 )
-from rest_framework import serializers
-from django.contrib.auth import authenticate
 
 from .models import User
 

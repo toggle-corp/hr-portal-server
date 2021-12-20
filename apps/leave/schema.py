@@ -1,14 +1,15 @@
-import graphene
-from datetime import date
 from typing import Union
+from datetime import date
+
+import graphene
 from graphene_django import DjangoObjectType
 from graphene_django_extras import DjangoObjectField, PageGraphqlPagination
 
 from apps.leave.models import Leave, LeaveDay
 from utils.graphene.fields import DjangoPaginatedListObjectField
 from utils.graphene.types import CustomDjangoListObjectType
-from .enums import LeaveTypeEnum, LeaveStatusEnum, LeaveDayTypeEnum
 from utils.graphene.enums import EnumDescription
+from .enums import LeaveTypeEnum, LeaveStatusEnum, LeaveDayTypeEnum
 
 DAYS_TYPE = {
     "ONE_DAY": "One Day",
@@ -17,8 +18,7 @@ DAYS_TYPE = {
 
 
 def get_leave_qs(info):
-    leave_qs = Leave.objects.filter(created_by=info.context.user).order_by('-created_at')
-    return leave_qs
+    return Leave.objects.filter(created_by=info.context.user).order_by('-created_at')
 
 
 class LeaveDayType(DjangoObjectType):

@@ -1,4 +1,5 @@
 import graphene
+
 from django.contrib.auth import login, logout
 
 from utils.graphene.error_types import mutation_is_not_valid, CustomErrorType

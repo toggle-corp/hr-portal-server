@@ -4,7 +4,6 @@ from django.db import transaction
 from django.conf import settings
 
 from hr_portal.mail import send_mail
-
 from .models import Leave
 
 DEFAULT_CC_EMAILS = [settings.MANAGEMENT_EMAIL, settings.HR_EMAIL]

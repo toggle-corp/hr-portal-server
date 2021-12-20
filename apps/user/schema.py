@@ -1,5 +1,6 @@
 import datetime
 from typing import Union
+
 import graphene
 from django.db.models import Sum
 from graphene_django import DjangoObjectType
