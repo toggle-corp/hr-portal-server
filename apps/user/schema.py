@@ -26,6 +26,25 @@ class UserType(DjangoObjectType):
 
     gender = graphene.Field(UserGenderEnum, required=True)
     gender_display = EnumDescription(source='get_gender_display', required=True)
+
+
+class UserListType(CustomDjangoListObjectType):
+    class Meta:
+        model = User
+        filterset_class = UserFilterSet
+
+
+class UserMeType(DjangoObjectType):
+    class Meta:
+        model = User
+        skip_registry = True
+        fields = (
+            'id', 'first_name', 'last_name', 'is_active',
+            'email', 'last_login'
+
+        )
+    gender = graphene.Field(UserGenderEnum, required=True)
+    gender_display = EnumDescription(source='get_gender_display', required=True)
     remaining_leave = graphene.String()
     total_leaves_days = graphene.String()
 
@@ -47,25 +66,6 @@ class UserType(DjangoObjectType):
     def resolve_total_leave_days(root, info, **kwargs) -> Union[str, None]:
         user = info.context.user
         return user.total_leaves_days
-
-
-class UserListType(CustomDjangoListObjectType):
-    class Meta:
-        model = User
-        filterset_class = UserFilterSet
-
-
-class UserMeType(DjangoObjectType):
-    class Meta:
-        model = User
-        skip_registry = True
-        fields = (
-            'id', 'first_name', 'last_name', 'is_active',
-            'email', 'last_login',
-
-        )
-    gender = graphene.Field(UserGenderEnum, required=True)
-    gender_display = EnumDescription(source='get_gender_display', required=True)
 
 
 class Query:
