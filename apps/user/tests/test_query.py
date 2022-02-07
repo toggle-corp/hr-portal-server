@@ -1,29 +1,22 @@
 from utils.graphene.tests import GraphQLTestCase
 from apps.user.factories import UserFactory
+from apps.user.models import User
+from apps.leave.factories import LeaveFactory
 
 
 class TestUserQuery(GraphQLTestCase):
     def setUp(self):
         self.query_me = '''
-            query Query {
+            query MyQuery {
                 me {
-                    id
-                    gender
-                    firstName
-                    lastName
-                    username
-                    secondaryPhoneNumber
-                    secondaryEmail
-                    primaryPhoneNumber
-                    primaryEmail
-                    joinedAt
-                    isSuperuser
-                    genderDisplay
                     email
-                    birthday
-                    avatarUrl
-                    avatar
-                    address
+                    firstName
+                    gender
+                    genderDisplay
+                    id
+                    isActive
+                    lastName
+                    lastLogin
                 }
             }
         '''
@@ -34,10 +27,11 @@ class TestUserQuery(GraphQLTestCase):
         self.query_check(self.query_me, assert_for_error=True)
 
         # Try with real user
-        user = UserFactory.create()
+        user = UserFactory.create(gender=User.Gender.MALE)
 
         # Login
         self.force_login(user)
+        LeaveFactory.create_batch(6, created_by=user)
 
         content = self.query_check(self.query_me)
         self.assertIdEqual(content['data']['me']['id'], user.id, content)

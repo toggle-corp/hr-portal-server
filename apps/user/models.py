@@ -27,11 +27,17 @@ class User(AbstractUser):
     address = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return self.get_full_name()
+
+    @property
+    def total_leaves_days(self):
+        if self.gender == User.Gender.FEMALE:
+            return 24  # 4+ Maternity Leave
+        return 20
 
     @property
     def full_name(self):
-        return f"{self.first_name} {self.last_name}"
+        return self.get_full_name()
 
 
 class Department(models.Model):

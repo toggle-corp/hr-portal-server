@@ -10,33 +10,48 @@ class TestLeaveQuery(GraphQLTestCase):
 
     def test_leave(self):
         self.query_leave = '''
-            query MyQuery {
-                leaves {
-                    additionalInformation
-                    createdAt
-                    deniedReason
-                    endDate
-                    id
-                    numOfDays
-                    startDate
-                    status
-                    statusDisplay
-                    type
-                    typeDisplay
-                    createdBy {
-                        id
-                        firstName
-                        lastName
-                        }
-                    leaveDay {
+           query MyQuery {
+                    leaves {
+                        results {
                         additionalInformation
-                        date
+                        createdAt
+                        createdBy {
+                            secondaryPhoneNumber
+                            secondaryEmail
+                            primaryPhoneNumber
+                            primaryEmail
+                            lastName
+                            joinedAt
+                            id
+                            genderDisplay
+                            gender
+                            firstName
+                            email
+                            birthday
+                            address
+                        }
+                        deniedReason
+                        endDate
                         id
+                        leaveDay {
+                            user
+                            type
+                            typeDisplay
+                            id
+                            additionalInformation
+                            date
+                        }
+                        numOfDays
+                        startDate
+                        requestDayType
+                        status
+                        statusDisplay
                         type
                         typeDisplay
                         }
                     }
                 }
+
         '''
         # Without Login session
         self.query_check(self.query_leave, assert_for_error=True)
@@ -49,14 +64,15 @@ class TestLeaveQuery(GraphQLTestCase):
         leaves = LeaveFactory.create_batch(5, created_by=user)
         content = self.query_check(self.query_leave)
         # query object count must be equal to the number of leave object created by authenticated user
-        self.assertEqual(len(content['data']['leaves']), 5, content)
+        self.assertEqual(len(content['data']['leaves']['results']), 5, content)
         # authenticatd user id must be equal to user id of a user in query
-        self.assertIdEqual(content['data']['leaves'][0]['createdBy']['id'], user.id, content)
-        self.assertIdEqual(content['data']['leaves'][0]['createdBy']['id'], leaves[0].created_by.id, content)
+        self.assertIdEqual(content['data']['leaves']['results'][0]['createdBy']['id'], user.id, content)
+        self.assertIdEqual(content['data']['leaves']['results'][0]['createdBy']['id'], leaves[0].created_by.id, content)
 
         user2 = UserFactory.create()
         # Login
         self.force_login(user2)
         content = self.query_check(self.query_leave)
+
         # new authenticated leave count has to be 0
-        self.assertEqual(len(content['data']['leaves']), 0, content)
+        self.assertEqual(len(content['data']['leaves']['results']), 0, content)

@@ -18,19 +18,11 @@ def remove_null(d):
     }
 
 
-class RemoveNullFieldsMixin():
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        return remove_null(rep)
-
-    def to_internal_value(self, data):
-        # Change None char fields to blanks
-        # TODO: Handle list and dict of charfields as well
-        for field, field_type in self.fields.items():
-            if isinstance(field_type, serializers.CharField):
-                if field in data and not data.get(field):
-                    data[field] = ''
-        return super().to_internal_value(data)
+class IntegerIDField(serializers.IntegerField):
+    """
+    This field is created to override the graphene conversion of the integerfield
+    """
+    pass
 
 
 class WriteOnlyOnCreateSerializerMixin():
@@ -45,3 +37,37 @@ class WriteOnlyOnCreateSerializerMixin():
             for field in write_only_on_create_fields:
                 fields[field].read_only = True
         return fields
+
+
+class MetaInformationSerializerMixin(serializers.Serializer):
+    """
+    Responsible to add following fields into the validated data
+    - created_by
+    - last_modified_by
+    """
+    created_at = serializers.DateTimeField(read_only=True)
+    modified_at = serializers.DateTimeField(read_only=True)
+    created_by = serializers.PrimaryKeyRelatedField(read_only=True)
+    modified_by = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    def validate(self, attrs) -> dict:
+        attrs = super().validate(attrs)
+        if self.instance is None:
+            attrs.update({
+                'created_by': self.context['request'].user
+            })
+        else:
+            attrs.update({
+                'modified_by': self.context['request'].user
+            })
+        return attrs
+
+
+class UpdateSerializerMixin:
+    """Makes all fields not required apart from the id field"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # all updates will be a patch update
+        for name in self.fields:
+            self.fields[name].required = False
+        self.fields['id'].required = True

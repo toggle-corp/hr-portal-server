@@ -28,6 +28,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'false').lower() == 'true'
 
 ALLOWED_HOSTS = [os.environ['ALLOWED_HOSTS']]
 
+APP_HOST = os.environ.get('APP_HOST', 'http://localhost:8050')
 
 # Application definition
 
@@ -47,6 +48,7 @@ THIRD_PARTY_APPS = [
     # 'graphene_django_extras',
     'graphene_graphiql_explorer',
     'drf_dynamic_fields',
+    'corsheaders',
 ]
 
 
@@ -88,6 +90,7 @@ GRAPHENE_NODES_WHITELIST = (
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -100,7 +103,7 @@ ROOT_URLCONF = 'hr_portal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join('apps', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -180,3 +183,56 @@ if DEBUG:
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_FROM = os.environ.get('EMAIL_FROM')
+
+# STATIC EMAILS (TC)
+HR_EMAIL = os.environ.get('HR_EMAIL', 'HR <hr@togglecorp.com>')
+MANAGEMENT_EMAIL = os.environ.get('MANAGEMENT_EMAIL', 'Management <management@togglecorp.com>')
+
+# CORS CONFIGS
+if DEBUG:
+    CORS_ORIGIN_ALLOW_ALL = True
+# else:
+#     CORS_ORIGIN_REGEX_WHITELIST = [
+#         r"^https://192.168.88.12:3010$",
+#     ]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+)
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)
+
+
+USE_SES_EMAIL_BACKEND = os.environ.get('USE_SES_EMAIL_BACKEND', 'false').lower() == 'true'
+if not USE_SES_EMAIL_BACKEND:
+    """
+    DUMP THE EMAIL TO CONSOLE
+    """
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    """
+    Use AWS SES
+    """
+    EMAIL_BACKEND = 'django_ses.SESBackend'
+    # If environment variable are not provided, then EC2 Role will be used.
+    AWS_SES_ACCESS_KEY_ID = os.environ.get('SES_AWS_ACCESS_KEY_ID')
+    AWS_SES_SECRET_ACCESS_KEY = os.environ.get('SES_AWS_SECRET_ACCESS_KEY')
